@@ -1,11 +1,12 @@
 import os
 import subprocess
 
-root_dir = r"F:\普中-麒麟F407开发板资料"
+root_dir = r"I:\Alpha\Store历史存档\Y2024_机械臂配套软件"
 target_exts = {'.intlib', '.chm', '.apk', '.tpl', '.dll', '.rtf', '.exe', '.cnt', '.hlp',
                 '.pos', '.fon', '.bin', '.nes', '<无后缀>', '.gif', '.cdl', '.mld', '.tcl', '.example',
                 '.vcproj', '.sln', '.cmd', '.ccxml', '.cproject', '.ccsproject', '.whs',
-                '.prefs', '.inf', '.ptl', '.bpl', '.lrc', '.sms', '.nes', '.shtml'}
+                '.prefs', '.inf', '.ptl', '.bpl', '.lrc', '.sms', '.nes', '.shtml', '.onnx',
+                '.action'}
 
 for foldername, subfolders, filenames in os.walk(root_dir):
     for filename in filenames:

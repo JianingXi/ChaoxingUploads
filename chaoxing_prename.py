@@ -5,7 +5,7 @@ from ChaoxingPrename.Xuexitong_03_Rename_files_by_Content import rename_files_by
 from ChaoxingPrename.Xuexitong_04_SplitDirWithin50Files import process_directory
 
 rename_by_content = 0
-target_directory = r"F:\普中-麒麟F407开发板资料"
+target_directory = r"I:\Alpha\Store历史存档\Y2024_机械臂配套软件"
 
 if not os.path.isdir(target_directory):
     print("错误: 指定的路径不是一个有效的目录!")

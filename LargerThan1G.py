@@ -2,10 +2,10 @@
 import os
 
 # 设置扫描的根目录
-root_folder = r"F:\普中-麒麟F407开发板资料"
+root_folder = r"I:\Alpha\Store历史存档\Y2024_机械臂配套软件"
 
 # 定义文件大小阈值（单位：字节）
-size_threshold = int(1.9 * 1024 * 1024 * 1024)  # 1.9 GB
+size_threshold = int(1.0 * 1024 * 1024 * 1024)  # 1.0 GB
 
 # 存储大文件路径
 large_files = []
@@ -27,5 +27,5 @@ with open(output_file, "w", encoding="utf-8") as f:
     for file_path in large_files:
         f.write(file_path + "\n")
 
-print(f"✅ 扫描完毕，共找到 {len(large_files)} 个大于 1.9 GB 的文件。")
+print(f"✅ 扫描完毕，共找到 {len(large_files)} 个大于 1.0 GB 的文件。")
 print(f"📄 结果已写入：{os.path.abspath(output_file)}")
