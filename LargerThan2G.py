@@ -2,7 +2,7 @@
 import os
 
 # 设置扫描的根目录
-root_folder = r"D:\微视频"
+root_folder = r"F:\普中-麒麟F407开发板资料"
 
 # 定义文件大小阈值（单位：字节）
 size_threshold = int(1.9 * 1024 * 1024 * 1024)  # 1.9 GB

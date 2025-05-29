@@ -27,16 +27,10 @@ def remove_empty_folders(path):
 
 
 if __name__ == "__main__":
-    target_directory = r"D:\\"  # 目标目录
+    target_directory = r"F:\普中-麒麟F407开发板资料"  # 目标目录
 
     # 安全确认
     print(f"即将扫描并删除空文件夹: {target_directory}")
-    print("警告: 此操作不可逆！")
-    confirm = input("确认要继续吗？(y/n): ").strip().lower()
 
-    if confirm == 'y':
-        print("开始扫描...")
-        count = remove_empty_folders(target_directory)
-        print(f"操作完成，共删除 {count} 个空文件夹")
-    else:
-        print("操作已取消")
+    count = remove_empty_folders(target_directory)
+    print(f"操作完成，共删除 {count} 个空文件夹")

@@ -1,7 +1,7 @@
 from ChaoxingUpload.chaoxing_upload_dir import upload_all_dirs_recursive
 
 folders = [
-    ("D:\\微视频\\5科普组", "最近上传/微视频/5科普组"),
+    (r"F:\普中-麒麟F407开发板资料", "最近上传/普中-麒麟F407开发板资料"),
 ]
 
 for local_folder, remote_folder in folders:
@@ -11,6 +11,6 @@ for local_folder, remote_folder in folders:
         remote_folder=remote_folder,
         course_url="https://mooc2-ans.chaoxing.com/mooc2-ans/mycourse/tch?courseid=224806989&clazzid=96513826&cpi=244937480&enc=e64ca0b26d9f168b4facb6a4a5137fda&t=1748252130471&pageHeader=3&v=2&hideHead=0",
         username="PhoneNumber",
-        password="Password****",
+        password="Ps",
         chromedriver_path="./ChromeDriver/chromedriver.exe"
     )
