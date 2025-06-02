@@ -2,6 +2,14 @@ import os
 import subprocess
 
 
+def load_blacklist(file_path):
+    """
+    从文本文件中读取黑名单后缀，生成一个 set。
+    """
+    with open(file_path, 'r', encoding='utf-8') as f:
+        return {line.strip().lower() for line in f if line.strip()}
+
+
 def file_format_to_rar(root_dir, target_exts, rar_exe_path=r"C:\Program Files\WinRAR\rar.exe"):
     """
     批量压缩指定目录下的目标后缀文件，并删除原文件
@@ -45,13 +53,13 @@ def file_format_to_rar(root_dir, target_exts, rar_exe_path=r"C:\Program Files\Wi
     print("🎉 操作完成！")
 
 
-# 示例调用
 if __name__ == "__main__":
-    root_dir = r"I:\STM32"
-    target_exts = {'.intlib', '.chm', '.apk', '.tpl', '.dll', '.rtf', '.exe', '.cnt', '.hlp',
-                   '.pos', '.fon', '.bin', '.nes', '<无后缀>', '.gif', '.cdl', '.mld', '.tcl', '.example',
-                   '.vcproj', '.sln', '.cmd', '.ccxml', '.cproject', '.ccsproject', '.whs',
-                   '.prefs', '.inf', '.ptl', '.bpl', '.lrc', '.sms', '.nes', '.shtml', '.onnx',
-                   '.action'}
+    # 从文本文件中读取黑名单后缀
+    blacklist_file = r"C:\MyPython\ChaoxingUploads\ChaoxingPrename\UploadList\blacklist.txt"
+    target_exts = load_blacklist(blacklist_file)
 
+    # 目标根目录
+    root_dir = r"I:\STM32"
+
+    # 进行操作
     file_format_to_rar(root_dir, target_exts)

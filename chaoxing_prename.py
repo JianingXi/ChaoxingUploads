@@ -1,17 +1,28 @@
 import os
+from ChaoxingPrename.Xuexitong_00_Remove_ad import rename_files_in_directory
 from ChaoxingPrename.Xuexitong_01_html2pdf import convert_html_files_in_directory
 from ChaoxingPrename.Xuexitong_02_ReplaceSymbol import rename_recursively
 from ChaoxingPrename.Xuexitong_03_Rename_files_by_Content import rename_files_by_content
 from ChaoxingPrename.Xuexitong_04_SplitDirWithin50Files import process_directory
-from ChaoxingPrename.Xuexitong_05_FileFormat2RAR import file_format_to_rar
-from ChaoxingPrename.Xuexitong_06_LargerThan1G import large_than_1g_files
+from ChaoxingPrename.Xuexitong_05_FileFormat2RAR import file_format_to_rar, load_blacklist
+from ChaoxingPrename.Xuexitong_06_RemoveEmptyDir import remove_empty_dirs
+from ChaoxingPrename.Xuexitong_07_LargerThan1G import large_than_1g_files
+from ChaoxingPrename.Xuexitong_08_FileExtensionPrint import count_file_extensions
 
 rename_by_content = 0
-target_directory = r"I:\Alpha\StoreLatestYears\Store2023\M02广医事务性工作"
+target_directory = r"C:\迅雷下载\互联网加_挑战杯_大创等合集"
 
 if not os.path.isdir(target_directory):
     print("错误: 指定的路径不是一个有效的目录!")
     exit(1)
+
+"""
+old_string = "大礼包"
+new_string = ""
+
+rename_files_in_directory(target_directory, old_string, new_string)
+"""
+
 
 convert_html_files_in_directory(target_directory)
 rename_recursively(target_directory)
@@ -20,12 +31,13 @@ if rename_by_content:
 process_directory(target_directory)
 
 
-target_exts = {'.intlib', '.chm', '.apk', '.tpl', '.dll', '.rtf', '.exe', '.cnt', '.hlp',
-        '.pos', '.fon', '.bin', '.nes', '<无后缀>', '.gif', '.cdl', '.mld', '.tcl', '.example',
-        '.vcproj', '.sln', '.cmd', '.ccxml', '.cproject', '.ccsproject', '.whs',
-        '.prefs', '.inf', '.ptl', '.bpl', '.lrc', '.sms', '.nes', '.shtml', '.onnx',
-        '.action'}
-
+blacklist_file = r"C:\MyPython\ChaoxingUploads\ChaoxingPrename\UploadList\blacklist.txt"
+target_exts = load_blacklist(blacklist_file)
 file_format_to_rar(target_directory, target_exts)
+remove_empty_dirs(target_directory)
 
 large_than_1g_files(target_directory, size_threshold_gb=1.0, output_file="large_files.txt")
+
+whitelist_file = r"C:\MyPython\ChaoxingUploads\ChaoxingPrename\UploadList\whitelist.txt"
+output_file = r"C:\MyPython\ChaoxingUploads\ChaoxingPrename\UploadList\Unknownlist.txt"
+count_file_extensions(target_directory, whitelist_file, output_file)

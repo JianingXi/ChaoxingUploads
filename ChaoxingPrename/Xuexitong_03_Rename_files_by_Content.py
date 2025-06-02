@@ -220,28 +220,33 @@ def get_unique_name(directory, new_name, ext):
 def rename_files_by_content(root_dir):
     """
     递归扫描指定目录中所有文件，
-    对于扩展名属于 ALLOWED_EXTENSIONS 且文件名（不含扩展名）长度小于 5 的文件，
+    对于扩展名属于 ALLOWED_EXTENSIONS 且文件名（不含扩展名）长度小于 7 的文件，
     解析文件内容提取中文连续字符序列，
-    如果提取到，则在原有文件名后追加"_"和提取的字符串作为新文件名（保留原扩展名）；
-    若未提取到，则保持原有文件名不变。
+    如果提取到，则在原有文件名（空格替换为下划线）后追加"_"和提取的字符串作为新文件名（保留原扩展名）；
+    若未提取到，则只替换空格为下划线。
     """
     for current_root, dirs, files in os.walk(root_dir):
         for filename in files:
             name, ext = os.path.splitext(filename)
             if ext.lower() not in ALLOWED_EXTENSIONS:
                 continue
-            if len(name) >= 6:
+            if len(name) >= 7:
                 continue
             file_path = os.path.join(current_root, filename)
             print(f"处理文件: {file_path}")
             content = get_file_text(file_path)
+
+            # 替换空格为下划线
+            name = name.replace(" ", "_")
+
             append_str = extract_chinese_name(content, min_length=8)
             if append_str:
-                # 新文件名为 原有文件名 + "_" + 提取的字符串
+                # 新文件名为：去空格后的原文件名 + "_" + 提取的字符串
                 new_base = f"{name}_{append_str}"
             else:
-                # 如果没有提取到，则保持原有文件名
+                # 只替换空格为下划线，不提取中文
                 new_base = name
+
             unique_new_filename = get_unique_name(current_root, new_base, ext)
             new_file_path = os.path.join(current_root, unique_new_filename)
             try:

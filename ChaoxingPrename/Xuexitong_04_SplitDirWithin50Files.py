@@ -2,6 +2,43 @@ import os
 import shutil
 import math
 
+MAX_PATH_LENGTH = 260  # Windows 路径长度限制
+
+
+def shorten_path_if_needed(file_path):
+    """
+    如果文件路径过长，逐步将文件移动到上一级目录，直到路径足够短。
+    """
+    while len(file_path) >= MAX_PATH_LENGTH:
+        parent_dir = os.path.dirname(file_path)
+        grandparent_dir = os.path.dirname(parent_dir)
+
+        # 如果已经到根目录，则无法再上移
+        if parent_dir == grandparent_dir:
+            print(f"⚠️ 文件仍然过长，且已无法上移：{file_path}")
+            break
+
+        file_name = os.path.basename(file_path)
+        new_path = os.path.join(grandparent_dir, file_name)
+
+        try:
+            shutil.move(file_path, new_path)
+            print(f"✅ 路径过长，已将文件上移：\n {file_path} -> {new_path}")
+            file_path = new_path  # 更新路径，继续检查
+        except Exception as e:
+            print(f"❌ 移动失败：{file_path}，错误：{e}")
+            break
+
+
+def check_and_shorten_all_files(root_dir):
+    """
+    递归遍历所有文件，检查路径长度，必要时执行 shorten_path_if_needed。
+    """
+    for foldername, subfolders, filenames in os.walk(root_dir, topdown=False):
+        for filename in filenames:
+            file_path = os.path.join(foldername, filename)
+            shorten_path_if_needed(file_path)
+
 
 def split_folder_if_needed(folder, max_files=50):
     """
@@ -17,37 +54,43 @@ def split_folder_if_needed(folder, max_files=50):
         original_folder_name = os.path.basename(folder)
         # 计算需要拆分的子文件夹数量
         num_splits = math.ceil(num_files / max_files)
-        print(f"目录 {folder} 中有 {num_files} 个文件，需要拆分为 {num_splits} 个子文件夹。")
+        print(f"📂 目录 {folder} 中有 {num_files} 个文件，需要拆分为 {num_splits} 个子文件夹。")
 
         # 创建拆分用的子文件夹
         split_folders = []
         for i in range(1, num_splits + 1):
-            # 子文件夹名称为 原文件夹名称 + 下划线 + 序号
             new_folder = os.path.join(folder, f"{original_folder_name}_{i}")
             os.makedirs(new_folder, exist_ok=True)
             split_folders.append(new_folder)
 
-        # 将文件依次分配到各个拆分子文件夹中，每个子文件夹内文件数量不超过 max_files
+        # 将文件依次分配到各个拆分子文件夹中
         for index, filename in enumerate(files):
             src = os.path.join(folder, filename)
-            # 根据文件的序号计算目标子文件夹的索引
             target_index = index // max_files
             dst = os.path.join(split_folders[target_index], filename)
             shutil.move(src, dst)
-            print(f"移动文件 {src} -> {dst}")
+            print(f"✅ 移动文件 {src} -> {dst}")
 
 
-def process_directory(root_dir):
+def process_directory(root_dir, max_files=50):
     """
-    递归遍历目录，对每个目录调用 split_folder_if_needed 函数，
-    使用 topdown=False 以确保先处理深层目录，再处理父目录。
+    递归遍历目录：
+    1️⃣ 先将路径过长的文件上移，直到不再过长
+    2️⃣ 对每个目录调用 split_folder_if_needed 进行拆分
     """
+    print("🔍 正在检查并上移路径过长的文件...")
+    check_and_shorten_all_files(root_dir)
+
+    print("🔍 正在拆分文件过多的文件夹...")
     for current_dir, subdirs, files in os.walk(root_dir, topdown=False):
-        split_folder_if_needed(current_dir)
+        split_folder_if_needed(current_dir, max_files=max_files)
+
+    print("🎉 所有操作已完成！")
 
 
 if __name__ == "__main__":
-    # 指定目标目录（路径前加 r 避免转义问题）
+    # 修改成你需要操作的目标目录
     target_directory = r"G:\作品\科普组"
 
-    process_directory(target_directory)
+    # 调用主函数
+    process_directory(target_directory, max_files=50)

@@ -41,7 +41,7 @@ def rename_files_in_directory(directory, old_str, new_str):
 
 if __name__ == "__main__":
     # 设置要处理的目录路径
-    target_directory = r"G:\D20250506_研究生院科普大赛作品\科普组"
+    target_directory = r"C:\迅雷下载\互联网加_挑战杯_大创等合集"
 
     # 检查路径是否存在
     if not os.path.isdir(target_directory):
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
 
     # 定义要替换的字符串
-    old_string = "D1127_"
+    old_string = "大礼包"
     new_string = ""
 
     print(f"开始处理目录: {target_directory}")
