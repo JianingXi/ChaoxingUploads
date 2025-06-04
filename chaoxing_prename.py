@@ -22,11 +22,11 @@ old_string = "大礼包"
 new_string = ""
 # 去广告
 rename_files_in_directory(target_directory, old_string, new_string)
-"""
+
 
 
 extract_all_archive_dirs(target_directory)
-
+"""
 
 dir_merge_batch(target_directory)
 

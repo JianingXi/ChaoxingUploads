@@ -73,4 +73,4 @@ def dir_merge_batch(root_folder: str):
             break
         print("🔄 本轮有合并操作，继续下一轮检测...")
 
-    print("🎉 所有合并操作已完成，文件夹已规整！")
+    print("🎉 所有合并操作已完成，文件夹已规整")
