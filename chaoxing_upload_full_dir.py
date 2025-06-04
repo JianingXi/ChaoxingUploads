@@ -1,7 +1,8 @@
 from ChaoxingUpload.chaoxing_upload_dir import upload_all_dirs_recursive
 
 folders = [
-    (r"I:\Alpha\StoreLatestYears\Store2023\M02广医事务性工作", "往年归档/往年教学资料/2023/OA"),
+    (r"G:\2022_学生竞赛",
+     "课程PBL项目/历年比赛作品归档/2022"),
 ]
 
 for local_folder, remote_folder in folders:

@@ -14,7 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 USERNAME = "PhoneNumber"
 PASSWORD = "Password*****"
 CHROMEDRIVER_PATH = "./ChromeDriver/chromedriver.exe"
-UPLOAD_FOLDER_PATH = r"D:\Alpha\StoreLatestYears\Store2024\B教学_教学与人才培养_B80_课程录像\信号与系统_习佳宁\Vedio\新建文件夹\D20240426_14"
+UPLOAD_FOLDER_PATH = r"D:\Alpha"
 FOLDER_PATH_ONLINE = "电脑上传文件/abc"
 # ============================
 

@@ -10,7 +10,7 @@ from ChaoxingPrename.Xuexitong_07_LargerThan1G import large_than_1g_files
 from ChaoxingPrename.Xuexitong_08_FileExtensionPrint import count_file_extensions
 
 rename_by_content = 0
-target_directory = r"C:\迅雷下载\互联网加_挑战杯_大创等合集"
+target_directory = r"G:\2022_学生竞赛"
 
 if not os.path.isdir(target_directory):
     print("错误: 指定的路径不是一个有效的目录!")
@@ -19,7 +19,7 @@ if not os.path.isdir(target_directory):
 """
 old_string = "大礼包"
 new_string = ""
-
+# 去广告
 rename_files_in_directory(target_directory, old_string, new_string)
 """
 
@@ -31,13 +31,13 @@ if rename_by_content:
 process_directory(target_directory)
 
 
-blacklist_file = r"C:\MyPython\ChaoxingUploads\ChaoxingPrename\UploadList\blacklist.txt"
+blacklist_file = r".\ChaoxingPrename\UploadList\blacklist.txt"
 target_exts = load_blacklist(blacklist_file)
 file_format_to_rar(target_directory, target_exts)
 remove_empty_dirs(target_directory)
 
 large_than_1g_files(target_directory, size_threshold_gb=1.0, output_file="large_files.txt")
 
-whitelist_file = r"C:\MyPython\ChaoxingUploads\ChaoxingPrename\UploadList\whitelist.txt"
-output_file = r"C:\MyPython\ChaoxingUploads\ChaoxingPrename\UploadList\Unknownlist.txt"
+whitelist_file = r".\ChaoxingPrename\UploadList\whitelist.txt"
+output_file = r".\ChaoxingPrename\UploadList\Unknownlist.txt"
 count_file_extensions(target_directory, whitelist_file, output_file)

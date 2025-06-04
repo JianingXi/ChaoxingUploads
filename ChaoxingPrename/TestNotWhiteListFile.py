@@ -34,10 +34,10 @@ def rename_files_to_extensions(folder, extensions):
 
 if __name__ == "__main__":
     # 目标文件夹
-    target_folder = r"C:\迅雷下载\DummyFiles"
+    target_folder = r".\DummyFiles"
 
     # 从文件中读取后缀列表
-    unknownlist_file = r"C:\MyPython\ChaoxingUploads\ChaoxingPrename\UploadList\Unknownlist.txt"
+    unknownlist_file = r"..\ChaoxingPrename\UploadList\Unknownlist.txt"
     extensions = read_extensions_from_file(unknownlist_file)
 
     # 第一步：创建txt文件

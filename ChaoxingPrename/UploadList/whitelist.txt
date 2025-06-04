@@ -42,3 +42,5 @@
 .cdr
 .ini
 .log
+.md
+.py

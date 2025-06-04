@@ -6,6 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
+from selenium.common.exceptions import TimeoutException
 
 
 def upload_files_to_chaoxing(
@@ -29,6 +30,7 @@ def upload_files_to_chaoxing(
         return
 
     # ✅ 如果有文件，继续后续操作
+    file_list = [f.replace("\\", "/") for f in file_list]
     file_list.sort(reverse=True)
     print(f"📂 共找到 {len(file_list)} 个文件待上传（倒序上传）：")
     for f in file_list:
@@ -63,34 +65,31 @@ def upload_files_to_chaoxing(
             print("⚠️ 页面没有 iframe，直接操作主页面")
 
         # 依次点击多级目录，支持翻页
-        folder_levels = multi_level_folder.split("/")
+        folder_levels = multi_level_folder.replace("\\", "/").split("/")
         for folder_name in folder_levels:
             print(f"➡️ 正在查找并点击：{folder_name}")
 
             folder_found = False
             while not folder_found:
                 try:
-                    # 尝试当前页是否能找到文件夹
                     folder_link = driver.find_element(By.XPATH, f"//a[@title='{folder_name}']")
                     folder_link.click()
                     print(f"✅ 已点击文件夹：{folder_name}")
                     folder_found = True
                     time.sleep(1)
                 except Exception:
-                    # 当前页没找到，尝试点击“下一页”
-                    try:
-                        next_btn = driver.find_element(By.XPATH, "//a[contains(@class,'nextPage')]")
+                    next_btns = driver.find_elements(By.XPATH, "//a[contains(@class,'nextPage')]")
+                    if not next_btns:
+                        raise Exception(f"⚠️ 页面没有“下一页”按钮，且当前页没找到：{folder_name}")
+                    else:
+                        next_btn = next_btns[0]
                         class_attr = next_btn.get_attribute("class")
                         if "disabled" in class_attr:
-                            print(f"⚠️ 已到最后一页，仍未找到文件夹：{folder_name}")
-                            raise Exception(f"文件夹 {folder_name} 不存在！")
+                            raise Exception(f"⚠️ 已到最后一页，仍未找到：{folder_name}")
                         else:
                             next_btn.click()
                             print("🔄 当前页未找到，点击“下一页”…")
                             time.sleep(2)
-                    except Exception as e:
-                        print(f"⚠️ 翻页出错：{e}")
-                        raise e
 
         # 点击“添加资料”按钮，打开上传弹窗
         add_btn = wait.until(EC.element_to_be_clickable(
@@ -100,10 +99,14 @@ def upload_files_to_chaoxing(
         time.sleep(2)
 
         # 点击“本地上传”按钮
-        local_btn = wait.until(EC.element_to_be_clickable(
-            (By.XPATH, "//a[@class='popLocalBnt']")))
-        local_btn.click()
-        print("✅ 已点击“本地上传”按钮，准备上传第一个文件")
+        try:
+            local_btn = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, "//a[@class='popLocalBnt']")))
+            local_btn.click()
+            print("✅ 已点击“本地上传”按钮，准备上传第一个文件")
+        except TimeoutException:
+            print("⚠️ 没有找到“本地上传”按钮，跳过当前目录上传")
+            return
         time.sleep(2)
 
         # 依次上传文件，确保每个文件真正上传完成
@@ -131,7 +134,9 @@ def upload_files_to_chaoxing(
                     print("⚠️ 单个文件上传超时，跳过…")
 
             except Exception as e:
+                import traceback
                 print("❌ 上传出错：", e)
+                traceback.print_exc()
                 continue
 
             time.sleep(1)
@@ -158,11 +163,25 @@ def upload_files_to_chaoxing(
         time.sleep(5)
 
     except Exception as e:
-        print("⚠️ 出错：", e)
-        input("❗ 出错了，按回车关闭浏览器…")
+        import traceback
+        print("❌ 上传出错：", e)
+        traceback.print_exc()
+
 
     finally:
         driver.quit()
+
+
+def get_first_level_subfolders(local_folder):
+    """
+    返回 local_folder 下第一层子文件夹的名字（不递归）
+    """
+    first_level_folders = []
+    with os.scandir(local_folder) as entries:
+        for entry in entries:
+            if entry.is_dir():
+                first_level_folders.append(entry.name)  # 只要文件夹名
+    return first_level_folders
 
 
 
@@ -178,9 +197,9 @@ def create_online_folders_and_get_mappings(
     在学习通中根据本地 upload_folder 下的第一层文件夹，在 multi_level_folder 下新建同名文件夹。
     返回: folder_mappings (dict)，包含每个文件夹的本地路径和线上路径。
     """
+
     # 🟡 先检测本地是否有子文件夹
-    subfolders = [f for f in os.listdir(upload_folder)
-                   if os.path.isdir(os.path.join(upload_folder, f))]
+    subfolders = get_first_level_subfolders(upload_folder)
     if not subfolders:
         print(f"📂 本地文件夹 {upload_folder} 下没有子文件夹，无需创建线上文件夹，直接退出。")
         return {}
@@ -224,27 +243,24 @@ def create_online_folders_and_get_mappings(
 
             while not folder_found:
                 try:
-                    # 先看当前页有没有该目录
                     folder_link = driver.find_element(By.XPATH, f"//a[@title='{folder_name}']")
                     folder_link.click()
                     print(f"✅ 已点击文件夹：{folder_name}")
                     folder_found = True
                     time.sleep(1)
                 except Exception:
-                    # 如果当前页没有，翻页查找
-                    try:
-                        next_btn = driver.find_element(By.XPATH, "//a[contains(@class,'nextPage')]")
+                    next_btns = driver.find_elements(By.XPATH, "//a[contains(@class,'nextPage')]")
+                    if not next_btns:
+                        raise Exception(f"⚠️ 页面没有“下一页”按钮，且当前页没找到：{folder_name}")
+                    else:
+                        next_btn = next_btns[0]
                         class_attr = next_btn.get_attribute("class")
                         if "disabled" in class_attr:
-                            print(f"⚠️ 已到最后一页，仍未找到文件夹：{folder_name}")
-                            raise Exception(f"文件夹 {folder_name} 不存在！")
+                            raise Exception(f"⚠️ 已到最后一页，仍未找到：{folder_name}")
                         else:
                             next_btn.click()
                             print("🔄 当前页未找到，点击“下一页”…")
                             time.sleep(2)
-                    except Exception as e:
-                        print(f"⚠️ 翻页按钮出错或不存在：{e}")
-                        raise e
 
         # 获取本地子文件夹（倒序）
         subfolders.sort(reverse=True)
@@ -310,6 +326,8 @@ def upload_all_dirs_recursive(local_folder, remote_folder, course_url, username,
     3️⃣ 用 Selenium 返回的线上映射继续递归，保证线上目录完整
     4️⃣ 如果 Selenium 出错，放弃该层递归，防止线上缺目录
     """
+    local_folder = local_folder.replace("\\", "/")
+    remote_folder = remote_folder.replace("\\", "/")
 
     print(f"\n🚀 开始处理目录：{local_folder} → {remote_folder}")
 
@@ -357,8 +375,8 @@ def upload_all_dirs_recursive(local_folder, remote_folder, course_url, username,
 # =========== 🟡 主入口调用 🟡 =============
 if __name__ == "__main__":
     upload_all_dirs_recursive(
-        local_folder=r"D:\微视频\科普组_视频类",
-        remote_folder="最近上传/微视频/1科普组_视频类",
+        local_folder=r"D:\aaa\bbb",
+        remote_folder="ffff/aaa/bbb",
         course_url="https://mooc2-ans.chaoxing.com/mooc2-ans/mycourse/tch?courseid=224806989&clazzid=96513826&cpi=244937480&enc=e64ca0b26d9f168b4facb6a4a5137fda&t=1748252130471&pageHeader=3&v=2&hideHead=0",
         username="Phone Number",
         password="Password****",

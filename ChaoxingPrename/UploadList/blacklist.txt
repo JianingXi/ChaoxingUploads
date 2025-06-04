@@ -108,3 +108,8 @@
 .shtml
 .onnx
 .action
+.下载
+.下载
+.jsp
+.sh
+.html
