@@ -26,8 +26,8 @@ def upload_files_to_chaoxing(
                   for f in os.listdir(upload_folder)
                   if os.path.isfile(os.path.join(upload_folder, f))]
     if not file_list:
-        print(f"📂 本地文件夹 {upload_folder} 下没有文件，无需上传，直接退出。")
-        return
+        print(f"📂 本地文件夹 {upload_folder} 下没有文件，跳过文件上传，但继续进入子文件夹处理。")
+
 
     # ✅ 如果有文件，继续后续操作
     file_list = [f.replace("\\", "/") for f in file_list]
