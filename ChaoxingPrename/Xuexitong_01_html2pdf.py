@@ -1,6 +1,7 @@
 import os
 import re
 import pdfkit
+import shutil
 from pathlib import Path
 
 # 配置 wkhtmltopdf 路径（根据实际安装路径修改）
@@ -62,23 +63,54 @@ def insert_base_tag(html_path):
     except Exception as e:
         print(f"预处理 {html_path} 时出错: {e}")
 
+import tempfile
+import tempfile
 
 def html_to_pdf(html_path, pdf_path):
-    """将HTML文件转换为PDF"""
+    """
+    临时处理 HTML 内容：保留图片，移除干扰资源，引入 base 标签，避免资源路径错误。
+    不修改原始 HTML 文件。
+    """
     try:
-        # 预处理HTML文件，插入<base>标签
-        insert_base_tag(html_path)
+        # 读取内容及编码
+        content, encoding_used = read_file_with_fallback(html_path)
+        if content is None:
+            return False
 
+        # 仅删除容易出错的标签：<script> 和 <link>
+        content = re.sub(r'<script[^>]*?>.*?</script>', '', content, flags=re.IGNORECASE | re.DOTALL)
+        content = re.sub(r'<link[^>]*?>', '', content, flags=re.IGNORECASE)
+
+        # 插入 <base> 标签指向 HTML 所在文件夹（仅限未存在时）
+        head_match = re.search(r'<head.*?>', content, flags=re.IGNORECASE)
+        if head_match and not re.search(r'<base\s', content, flags=re.IGNORECASE):
+            abs_dir = Path(html_path).parent.resolve()
+            base_tag = f'<base href="file:///{abs_dir.as_posix()}/">'
+            content = content[:head_match.end()] + base_tag + content[head_match.end():]
+
+        # 写入临时 HTML 文件
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".html", mode='w', encoding=encoding_used) as tmp_file:
+            tmp_file.write(content)
+            tmp_html_path = tmp_file.name
+
+        # 设置 wkhtmltopdf 转换选项
         options = {
-            'enable-local-file-access': None,  # 允许访问本地资源
-            'load-error-handling': 'ignore',  # 忽略加载错误
-            'load-media-error-handling': 'ignore'  # 忽略媒体加载错误
+            'enable-local-file-access': None,
+            'load-error-handling': 'ignore',
+            'load-media-error-handling': 'ignore'
         }
-        pdfkit.from_file(html_path, pdf_path, configuration=config, options=options)
+
+        # 转换为 PDF
+        pdfkit.from_file(tmp_html_path, pdf_path, configuration=config, options=options)
+
+        # 删除临时文件
+        os.remove(tmp_html_path)
         return True
+
     except Exception as e:
         print(f"转换失败 {html_path}: {e}")
         return False
+
 
 
 def convert_html_files_in_directory(directory):
@@ -91,20 +123,36 @@ def convert_html_files_in_directory(directory):
                 html_path = os.path.join(root, filename)
                 pdf_path = os.path.splitext(html_path)[0] + '.pdf'
                 print(f"正在处理: {html_path}")
+
+
                 if html_to_pdf(html_path, pdf_path):
                     if os.path.exists(pdf_path):
                         try:
+                            # 删除原始 HTML 文件
                             os.remove(html_path)
                             print(f"转换成功并已删除原始文件: {html_path}")
+
+                            # 尝试删除资源文件夹（匹配 _files 或 .files）
+                            html_dir = os.path.dirname(html_path)
+                            html_base = os.path.splitext(os.path.basename(html_path))[0]
+                            possible_dirs = [
+                                os.path.join(html_dir, f"{html_base}_files"),
+                                os.path.join(html_dir, f"{html_base}.files")
+                            ]
+
+                            for res_dir in possible_dirs:
+                                if os.path.isdir(res_dir):
+                                    shutil.rmtree(res_dir)
+                                    print(f"已删除资源文件夹: {res_dir}")
                         except Exception as e:
-                            print(f"删除原始文件失败 {html_path}: {e}")
+                            print(f"删除原始文件或文件夹失败 {html_path}: {e}")
                     else:
                         print(f"PDF文件未生成: {pdf_path}")
 
 
 if __name__ == "__main__":
     # 指定要处理的目录
-    target_directory = r"G:\作品\科普组"
+    target_directory = r"G:\作品"
 
     if not os.path.isdir(target_directory):
         print("错误: 指定的路径不是一个有效的目录!")
