@@ -44,3 +44,14 @@
 .log
 .md
 .py
+.m
+.mat
+.gz
+.mov
+.prj
+.7z
+.mp3
+.m4a
+.ai
+.tex
+.wav

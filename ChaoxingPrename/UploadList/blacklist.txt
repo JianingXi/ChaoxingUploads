@@ -113,3 +113,17 @@
 .jsp
 .sh
 .html
+.wfp
+.yml
+.fig
+.asv
+.results
+.seg
+.enl
+.dic
+.ens
+.myd
+.myi
+.tsv
+.mlapp
+.fsthumb

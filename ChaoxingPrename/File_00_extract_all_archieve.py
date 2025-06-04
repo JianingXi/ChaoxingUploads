@@ -152,8 +152,8 @@ def extract_all_archives(root_path):
         else:
             logging.info("🔄 发现新解压文件中的压缩包，继续下一轮...")
 
-if __name__ == "__main__":
-    root_dir = r"G:\B教学_教学与人才培养_A03_学生竞赛"
-    rarfile.UNRAR_TOOL = r"C:\Program Files\WinRAR\UnRAR.exe"
+def extract_all_archive_dirs(root_dir: str, rarfile_location = r"C:\Program Files\WinRAR\UnRAR.exe"):
+    # root_dir = r"G:\竞赛"
+    rarfile.UNRAR_TOOL = rarfile_location
     extract_all_archives(root_dir)
     logging.info("🎉 所有压缩包及嵌套压缩包解压完毕！查看failures.txt排查失败文件。")

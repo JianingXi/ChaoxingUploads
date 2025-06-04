@@ -1,72 +1,72 @@
 import os
 import shutil
 
-def merge_single_subfolder_or_file(root_dir):
-    """
-    对于每个文件夹：
-    - 如果内部只有一个子文件夹且无其他文件，保留较长的名字，合并子文件夹内容。
-    - 如果内部只有一个文件且无其他子文件夹，保留较长的名字，移出来，删掉空文件夹。
-    返回值: 本轮是否有合并操作
-    """
-    merged = False  # 记录是否有合并操作
+import os
+import shutil
 
-    for dirpath, dirnames, filenames in os.walk(root_dir, topdown=False):
+def merge_single_subfolder_or_file(root_dir):
+    merged = False
+    all_dirs = list(os.walk(root_dir, topdown=False))  # 缓存结构
+
+    for dirpath, dirnames, filenames in all_dirs:
+        if not os.path.exists(dirpath):  # 🚨 防止路径失效
+            continue
+
         current_folder = os.path.basename(dirpath)
         parent_path = os.path.dirname(dirpath)
 
-        # Case 1: 只有一个子文件夹且无其他文件
+        # Case 1: 只有一个子文件夹且无文件
         if len(dirnames) == 1 and len(filenames) == 0:
             only_subdir = dirnames[0]
             only_subdir_path = os.path.join(dirpath, only_subdir)
 
-            # 比较名字长度
+            if not os.path.exists(only_subdir_path):  # 🚨 子文件夹可能已被移动或删除
+                continue
+
             longer_name = max(current_folder, only_subdir, key=len)
 
-            # 把子文件夹内容移出来
             for item in os.listdir(only_subdir_path):
                 shutil.move(os.path.join(only_subdir_path, item), dirpath)
 
-            # 删除空的子文件夹
             os.rmdir(only_subdir_path)
 
-            # 如果名字不同，重命名
             if current_folder != longer_name:
                 new_path = os.path.join(parent_path, longer_name)
-                os.rename(dirpath, new_path)
-                print(f"✅ 合并文件夹并重命名: {dirpath} -> {new_path}")
+                if not os.path.exists(new_path):  # 防止重名冲突
+                    os.rename(dirpath, new_path)
+                    print(f"✅ 合并文件夹并重命名: {dirpath} -> {new_path}")
+                else:
+                    print(f"⚠️ 跳过重命名，目标已存在: {new_path}")
             else:
                 print(f"✅ 合并文件夹: {dirpath}")
 
             merged = True
 
-        # Case 2: 只有一个文件且无其他子文件夹
+        # Case 2: 只有一个文件且无子文件夹
         elif len(dirnames) == 0 and len(filenames) == 1:
             only_file = filenames[0]
             only_file_path = os.path.join(dirpath, only_file)
 
-            # 比较名字长度
+            if not os.path.exists(only_file_path):
+                continue
+
             longer_name = max(current_folder, os.path.splitext(only_file)[0], key=len)
             new_file_ext = os.path.splitext(only_file)[1]
-
-            # 新的文件名
             new_file_name = f"{longer_name}{new_file_ext}"
             new_file_path = os.path.join(parent_path, new_file_name)
 
-            # 移动文件
-            shutil.move(only_file_path, new_file_path)
-
-            # 删除空文件夹
-            os.rmdir(dirpath)
-            print(f"✅ 文件移出并重命名: {only_file_path} -> {new_file_path}")
-
-            merged = True
+            # 若目标文件存在则避免覆盖
+            if not os.path.exists(new_file_path):
+                shutil.move(only_file_path, new_file_path)
+                os.rmdir(dirpath)
+                print(f"✅ 文件移出并重命名: {only_file_path} -> {new_file_path}")
+                merged = True
+            else:
+                print(f"⚠️ 跳过移动，目标文件已存在: {new_file_path}")
 
     return merged
 
-if __name__ == "__main__":
-    root_folder = r"G:\2022_学生竞赛"  # 替换为你的根目录
-
-    # 反复循环，直到没有新的合并
+def dir_merge_batch(root_folder: str):
     while True:
         changed = merge_single_subfolder_or_file(root_folder)
         if not changed:
