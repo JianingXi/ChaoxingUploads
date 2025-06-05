@@ -72,7 +72,7 @@ def split_folder_if_needed(folder, max_files=50):
             print(f"✅ 移动文件 {src} -> {dst}")
 
 
-def process_directory(root_dir, max_files=50):
+def process_directory_50files(root_dir, max_files=50):
     """
     递归遍历目录：
     1️⃣ 先将路径过长的文件上移，直到不再过长
@@ -93,4 +93,4 @@ if __name__ == "__main__":
     target_directory = r"G:\作品\科普组"
 
     # 调用主函数
-    process_directory(target_directory, max_files=50)
+    process_directory_50files(target_directory, max_files=50)
